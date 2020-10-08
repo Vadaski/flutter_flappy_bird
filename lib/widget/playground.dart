@@ -22,7 +22,7 @@ class _PlayGroundState extends State<PlayGround> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    WidgetsBinding.instance?.addPostFrameCallback((Duration timeStamp) {
       hitTestController = HitTestController(
         bird: birdKey.currentContext,
       );

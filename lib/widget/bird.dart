@@ -16,7 +16,7 @@ class _BirdState extends State<Bird> with SingleTickerProviderStateMixin{
   Widget build(BuildContext context) {
     return StreamBuilder(
         stream: widget.engine.position,
-        builder: (context, snapshot) {
+        builder: (context, AsyncSnapshot<double> snapshot) {
           if (!snapshot.hasData) return Container();
           final double position = snapshot.data;
 //          print('get it: $position');
@@ -26,4 +26,3 @@ class _BirdState extends State<Bird> with SingleTickerProviderStateMixin{
         });
   }
 }
-

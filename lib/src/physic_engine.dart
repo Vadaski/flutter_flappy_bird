@@ -1,14 +1,11 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/src/scheduler/ticker.dart';
-
-enum EngineStatus{
+enum EngineStatus {
   run,
   stop,
 }
 
-class PhysicEngine{
+class PhysicEngine {
   PhysicEngine() {
     init();
   }
@@ -33,22 +30,21 @@ class PhysicEngine{
 
   double _maxHeight = 0;
 
-  set setMaxHeight(double maxHeight){
+  set setMaxHeight(double maxHeight) {
     _maxHeight = maxHeight;
   }
 
-  StreamController _positionController =
-      StreamController.broadcast();
+  StreamController _positionController = StreamController<double>.broadcast();
 
   Stream<double> get position => _positionController.stream
-      .where((event) => event is double)
-      .map((event) => event as double);
+      .where((dynamic event) => event is double)
+      .map((dynamic event) => event as double);
 
 //  StreamSink get _positionPublisher => _positionController.sink;
 
   EngineStatus get status => _engineStatus;
 
-  init() {
+  void init() {
     _height = 200;
 
     _engineTimer = Timer.periodic(Duration(milliseconds: _engineTick), (timer) {
@@ -62,9 +58,9 @@ class PhysicEngine{
     _engineStatus = EngineStatus.run;
   }
 
-  dispose() {
-    _engineTimer.cancel();
-    _flyTimer.cancel();
+  void dispose() {
+    _engineTimer?.cancel();
+    _flyTimer?.cancel();
     _positionController.close();
   }
 
@@ -77,18 +73,18 @@ class PhysicEngine{
     if (_height < 0 || _height > _maxHeight) stop();
   }
 
-  up() {
+  void up() {
     _v = _upV;
   }
 
-  stop() {
-    _flyTimer.cancel();
-    _engineTimer.cancel();
+  void stop() {
+    _flyTimer?.cancel();
+    _engineTimer?.cancel();
 
     _engineStatus = EngineStatus.stop;
   }
 
-  restart() {
+  void restart() {
     init();
   }
 }
