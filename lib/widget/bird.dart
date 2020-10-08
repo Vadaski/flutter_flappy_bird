@@ -4,10 +4,10 @@
 ///
 import 'package:flutter/material.dart';
 
-import '../src/bird_physics_engine.dart';
+import '../src/bird_physics.dart';
 
 // ignore: must_be_immutable
-class Bird extends StatelessWidget with BirdPhysicsEngine {
+class Bird extends StatelessWidget with BirdPhysics {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<double>(

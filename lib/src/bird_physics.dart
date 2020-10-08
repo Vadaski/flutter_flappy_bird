@@ -8,7 +8,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-final TweenSequence<double> _tweenSequence = TweenSequence<double>(
+final TweenSequence<double> _jumpingTweenSequence = TweenSequence<double>(
   <TweenSequenceItem<double>>[
     TweenSequenceItem<double>(
       tween: Tween<double>(begin: 0.0, end: 1.0),
@@ -25,14 +25,14 @@ final TweenSequence<double> _tweenSequence = TweenSequence<double>(
   ],
 );
 
-class BirdPhysicsEngine {
+class BirdPhysics {
   late final MediaQueryData _mediaQuery = MediaQueryData.fromWindow(ui.window);
 
   double get _maxHeight => _mediaQuery.size.height;
 
   final Size birdSize = const Size.square(50.0);
 
-  double get _jumpingValue => _maxHeight / 6;
+  double jumpingValue = 100.0;
 
   double _currentHeight = 0.0;
 
@@ -55,21 +55,21 @@ class BirdPhysicsEngine {
     _vsync = vsync;
     _animationController = AnimationController(
       vsync: vsync,
-      duration: const Duration(milliseconds: 750),
+      duration: const Duration(milliseconds: 550),
     );
-    _animation = _tweenSequence.animate(
+    _animation = _jumpingTweenSequence.animate(
       CurvedAnimation(
         parent: _animationController,
         curve: Curves.slowMiddle,
       ),
     );
     _animation.addListener(() {
-      _streamController.add(_currentHeight + _animation.value * _jumpingValue);
+      _streamController.add(_currentHeight + _animation.value * jumpingValue);
     });
   }
 
   Future<void> drive() async {
-    _currentHeight += _animation.value * _jumpingValue;
+    _currentHeight += _animation.value * jumpingValue;
     _fallAnimationController?.stop();
     _animationController
       ..stop()
@@ -92,7 +92,7 @@ class BirdPhysicsEngine {
       })
       ..animateTo(
         0.0,
-        duration: Duration(milliseconds: 500 * _currentHeight ~/ _maxHeight),
+        duration: Duration(milliseconds: 1000 * _currentHeight ~/ _maxHeight),
         curve: Curves.linear,
       );
   }
