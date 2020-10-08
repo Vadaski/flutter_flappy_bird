@@ -25,25 +25,41 @@ final TweenSequence<double> _jumpingTweenSequence = TweenSequence<double>(
   ],
 );
 
-class BirdPhysics {
+abstract class BirdPhysics {
+  BirdPhysics({
+    required TickerProvider vsync,
+    this.builder,
+    this.birdSize = const Size.square(50.0),
+    this.jumpingValue = 100.0,
+  }) {
+    _vsync = vsync;
+    initializeAnimations();
+  }
+
+  late final TickerProvider _vsync;
+  final Size birdSize;
+  final double jumpingValue;
+  final AsyncWidgetBuilder<double>? builder;
+
   late final MediaQueryData _mediaQuery = MediaQueryData.fromWindow(ui.window);
 
   double get _maxHeight => _mediaQuery.size.height;
-
-  final Size birdSize = const Size.square(50.0);
-
-  double jumpingValue = 100.0;
 
   double _currentHeight = 0.0;
 
   double get currentHeight => _currentHeight;
 
-  final StreamController<double> _streamController =
+  double _lastFallHeight = 0.0;
+
+  final StreamController<double> _heightStreamController =
       StreamController<double>.broadcast();
 
-  Stream<double> get stream => _streamController.stream;
+  Stream<double> get heightStream => _heightStreamController.stream;
 
-  late final TickerProvider _vsync;
+  final StreamController<double> _fallDeltaStreamController =
+      StreamController<double>.broadcast();
+
+  Stream<double> get fallDeltaStream => _fallDeltaStreamController.stream;
 
   late final AnimationController _animationController;
 
@@ -51,10 +67,9 @@ class BirdPhysics {
 
   AnimationController? _fallAnimationController;
 
-  void standBy({required TickerProvider vsync}) {
-    _vsync = vsync;
+  void initializeAnimations() {
     _animationController = AnimationController(
-      vsync: vsync,
+      vsync: _vsync,
       duration: const Duration(milliseconds: 550),
     );
     _animation = _jumpingTweenSequence.animate(
@@ -64,7 +79,8 @@ class BirdPhysics {
       ),
     );
     _animation.addListener(() {
-      _streamController.add(_currentHeight + _animation.value * jumpingValue);
+      _heightStreamController
+          .add(_currentHeight + _animation.value * jumpingValue);
     });
   }
 
@@ -81,19 +97,33 @@ class BirdPhysics {
     }
   }
 
-  void fallToGround() {
+  Future<void> fallToGround() async {
+    _lastFallHeight = _currentHeight;
     _fallAnimationController = AnimationController.unbounded(
       vsync: _vsync,
       value: _currentHeight,
-    )
-      ..addListener(() {
+    )..addListener(() {
         _currentHeight = _fallAnimationController?.value ?? _currentHeight;
-        _streamController.add(_currentHeight);
-      })
-      ..animateTo(
-        0.0,
-        duration: Duration(milliseconds: 1000 * _currentHeight ~/ _maxHeight),
-        curve: Curves.linear,
-      );
+        _heightStreamController.add(_currentHeight);
+      });
+    await _fallAnimationController?.animateTo(
+      0.0,
+      duration: Duration(milliseconds: 1000 * _currentHeight ~/ _maxHeight),
+      curve: Curves.linear,
+    );
+  }
+
+  Widget build(BuildContext context) {
+    return StreamBuilder<double>(
+      stream: heightStream,
+      initialData: 0.0,
+      builder: (BuildContext ctx, AsyncSnapshot<double> data) {
+        return Positioned(
+          bottom: data.data,
+          child:
+              builder?.call(context, data) ?? FlutterLogo(size: birdSize.width),
+        );
+      },
+    );
   }
 }

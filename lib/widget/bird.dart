@@ -6,19 +6,9 @@ import 'package:flutter/material.dart';
 
 import '../src/bird_physics.dart';
 
-// ignore: must_be_immutable
-class Bird extends StatelessWidget with BirdPhysics {
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<double>(
-      stream: stream,
-      initialData: 0.0,
-      builder: (_, AsyncSnapshot<double> data) {
-        return Positioned(
-          bottom: data.data,
-          child: FlutterLogo(size: birdSize.width),
-        );
-      },
-    );
-  }
+class Bird extends BirdPhysics {
+  Bird({
+    required TickerProvider vsync,
+    AsyncWidgetBuilder<double>? builder,
+  }) : super(vsync: vsync, builder: builder);
 }

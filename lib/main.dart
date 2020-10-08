@@ -14,7 +14,7 @@ class Playground extends StatefulWidget {
 }
 
 class _PlaygroundState extends State<Playground> with TickerProviderStateMixin {
-  late final Bird newBird = Bird()..standBy(vsync: this);
+  late final Bird bird = Bird(vsync: this);
 
   @override
   Widget build(BuildContext context) {
@@ -25,20 +25,19 @@ class _PlaygroundState extends State<Playground> with TickerProviderStateMixin {
         children: <Widget>[
           Center(
             child: StreamBuilder<double>(
-              stream: newBird.stream,
+              stream: bird.heightStream,
               initialData: 0.0,
               builder: (_, AsyncSnapshot<double> data) {
                 return Text(data.data.toString());
               },
             ),
           ),
-          newBird,
+          bird.build(context),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          newBird.drive();
-        },
+        onPressed: bird.drive,
+        child: const Icon(Icons.airplanemode_active),
       ),
     );
   }
