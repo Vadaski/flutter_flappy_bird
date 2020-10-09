@@ -141,15 +141,6 @@ abstract class BlockerPhysics {
   }
 
   Widget build(BuildContext context) {
-    return StreamBuilder<double>(
-      stream: heightStream,
-      initialData: 0.0,
-      builder: (BuildContext ctx, AsyncSnapshot<double> data) {
-        return Positioned(
-          bottom: data.data,
-          child: builder.call(context, this),
-        );
-      },
-    );
+    return builder.call(context, this);
   }
 }
