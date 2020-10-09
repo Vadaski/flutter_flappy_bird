@@ -1,29 +1,14 @@
+///
+/// [Author] Alex (https://github.com/AlexV525)
+/// [Date] 2020/10/8 21:56
+///
 import 'package:flutter/material.dart';
-import '../src/physic_engine.dart';
 
-class Bird extends StatefulWidget {
-  final Key key;
-  final PhysicEngine engine;
+import '../src/bird_physics.dart';
 
-  Bird({@required this.engine, this.key}):super(key: key);
-
-  @override
-  _BirdState createState() => _BirdState();
+class Bird extends BirdPhysics {
+  Bird({
+    required TickerProvider vsync,
+    AsyncWidgetBuilder<double>? builder,
+  }) : super(vsync: vsync, builder: builder);
 }
-
-class _BirdState extends State<Bird> with SingleTickerProviderStateMixin{
-  @override
-  Widget build(BuildContext context) {
-    return StreamBuilder(
-        stream: widget.engine.position,
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) return Container();
-          final double position = snapshot.data;
-//          print('get it: $position');
-          return Positioned(bottom: position, left: 100, child: FlutterLogo(
-            size: 100,
-          ));
-        });
-  }
-}
-
