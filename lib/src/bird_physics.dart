@@ -43,11 +43,19 @@ abstract class BirdPhysics {
 
   late final MediaQueryData _mediaQuery = MediaQueryData.fromWindow(ui.window);
 
+  // 小鸟初始高度
+  double get _initialHeight => _mediaQuery.size.height / 2.5;
+
+  // 小鸟最高能飞到的高度
   double get _maxHeight => _mediaQuery.size.height;
 
-  double _currentHeight = 0.0;
+  // 当前高度
+  late double _currentHeight = _initialHeight;
 
+  // 对外暴露当前高度
   double get currentHeight => _currentHeight;
+
+  double get _startFromLeft => 100;
 
   double _lastFallHeight = 0.0;
 
@@ -116,12 +124,15 @@ abstract class BirdPhysics {
   Widget build(BuildContext context) {
     return StreamBuilder<double>(
       stream: heightStream,
-      initialData: 0.0,
-      builder: (BuildContext ctx, AsyncSnapshot<double> data) {
+      initialData: _initialHeight,
+      builder: (BuildContext ctx, AsyncSnapshot<double> snapshot) {
+        final double? currentHeight = snapshot.data;
         return Positioned(
-          bottom: data.data,
+          bottom: currentHeight,
+          left: _startFromLeft,
           child:
-              builder?.call(context, data) ?? FlutterLogo(size: birdSize.width),
+              builder?.call(context, snapshot)
+                  ?? FlutterLogo(size: birdSize.width),
         );
       },
     );
