@@ -4,135 +4,76 @@
 ///
 import 'dart:async';
 import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-final TweenSequence<double> _jumpingTweenSequence = TweenSequence<double>(
-  <TweenSequenceItem<double>>[
-    TweenSequenceItem<double>(
-      tween: Tween<double>(begin: 0.0, end: 1.0),
-      weight: 1.0,
-    ),
-    TweenSequenceItem<double>(
-      tween: ConstantTween<double>(1.0),
-      weight: 0.0125,
-    ), // 滞空一小会儿~
-    TweenSequenceItem<double>(
-      tween: Tween<double>(begin: 1.0, end: 0.0),
-      weight: 1.0,
-    ),
-  ],
-);
-
 abstract class BirdPhysics {
   BirdPhysics({
-    required TickerProvider vsync,
     this.builder,
-    this.birdSize = const Size.square(50.0),
-    this.jumpingValue = 100.0,
-  }) {
-    _vsync = vsync;
-    initializeAnimations();
-  }
+    this.birdSize = const Size.square(70.0),
+  });
 
-  late final TickerProvider _vsync;
   final Size birdSize;
-  final double jumpingValue;
   final AsyncWidgetBuilder<double>? builder;
 
-  late final MediaQueryData _mediaQuery = MediaQueryData.fromWindow(ui.window);
-
-  // 小鸟初始高度
-  double get _initialHeight => _mediaQuery.size.height / 2.5;
-
-  // 小鸟最高能飞到的高度
-  double get _maxHeight => _mediaQuery.size.height;
-
+  double _yAxis = 0.0;
+  double _time = 0.0;
   // 当前高度
   late double _currentHeight = _initialHeight;
+  // 小鸟初始高度
+  late double _initialHeight = _yAxis;
 
   // 对外暴露当前高度
   double get currentHeight => _currentHeight;
-
-  double get _startFromLeft => 100;
-
-  double _lastFallHeight = 0.0;
 
   final StreamController<double> _heightStreamController =
       StreamController<double>.broadcast();
 
   Stream<double> get heightStream => _heightStreamController.stream;
 
-  final StreamController<double> _fallDeltaStreamController =
-      StreamController<double>.broadcast();
+  final GlobalKey _key = GlobalKey();
 
-  Stream<double> get fallDeltaStream => _fallDeltaStreamController.stream;
+  RenderBox? get box => _key?.currentContext?.findRenderObject() as RenderBox;
 
-  late final AnimationController _animationController;
-
-  late final Animation<double> _animation;
-
-  AnimationController? _fallAnimationController;
-
-  void initializeAnimations() {
-    _animationController = AnimationController(
-      vsync: _vsync,
-      duration: const Duration(milliseconds: 550),
-    );
-    _animation = _jumpingTweenSequence.animate(
-      CurvedAnimation(
-        parent: _animationController,
-        curve: Curves.slowMiddle,
-      ),
-    );
-    _animation.addListener(() {
-      _heightStreamController
-          .add(_currentHeight + _animation.value * jumpingValue);
-    });
+  void drive() {
+    _time = 0;
+    _initialHeight = _yAxis;
+    _heightStreamController.add(_yAxis);
   }
 
-  Future<void> drive() async {
-    _currentHeight += _animation.value * jumpingValue;
-    _fallAnimationController?.stop();
-    _animationController
-      ..stop()
-      ..reset();
-    await _animationController.forward();
-    _animationController.reset();
-    if (_currentHeight > 0.0) {
-      fallToGround();
+  void startGame(Timer timer) {
+    _time += 0.05;
+    _currentHeight = -4.9 * _time * _time + 2.8 * _time;
+    _yAxis = _initialHeight - _currentHeight;
+    _heightStreamController.add(_yAxis);
+    if (_yAxis > 1 || _yAxis < -1) {
+      timer.cancel();
+      resetState();
     }
   }
 
-  Future<void> fallToGround() async {
-    _lastFallHeight = _currentHeight;
-    _fallAnimationController = AnimationController.unbounded(
-      vsync: _vsync,
-      value: _currentHeight,
-    )..addListener(() {
-        _currentHeight = _fallAnimationController?.value ?? _currentHeight;
-        _heightStreamController.add(_currentHeight);
-      });
-    await _fallAnimationController?.animateTo(
-      0.0,
-      duration: Duration(milliseconds: 1000 * _currentHeight ~/ _maxHeight),
-      curve: Curves.linear,
-    );
+  void resetState() {
+    _yAxis = 0;
+    _time = 0;
+    _currentHeight = 0;
+    _initialHeight = 0;
+    _heightStreamController.add(_yAxis);
   }
 
   Widget build(BuildContext context) {
     return StreamBuilder<double>(
       stream: heightStream,
-      initialData: _initialHeight,
+      initialData: _yAxis,
       builder: (BuildContext ctx, AsyncSnapshot<double> snapshot) {
-        final double? currentHeight = snapshot.data;
-        return Positioned(
-          bottom: currentHeight,
-          left: _startFromLeft,
-          child:
-              builder?.call(context, snapshot)
-                  ?? FlutterLogo(size: birdSize.width),
+        final double currentHeight = snapshot.data ?? 0;
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 0),
+          alignment: Alignment(0.0, currentHeight),
+          child: SizedBox(
+            key: _key,
+            child: builder?.call(context, snapshot) ??
+                FlutterLogo(size: birdSize.width),
+          )
         );
       },
     );

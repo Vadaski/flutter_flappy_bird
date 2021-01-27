@@ -1,64 +1,74 @@
-///
-/// [Author] Alex (https://github.com/AlexV525)
-/// [Date] 2020/10/9 17:33
-///
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 
-import '../src/bird_physics.dart';
-import '../src/blocker_physics.dart';
+class Blocker {
+  int upper;
+  int lower;
+  double blockerPosition = 0;
+  double initPosition;
+  StreamController<double> _positionController =
+      StreamController<double>.broadcast();
 
-class Blocker extends BlockerPhysics {
-  Blocker.random({
-    required BirdPhysics bird,
-    required TickerProvider vsync,
-    double thickness = defaultBlockerThickness,
-  }) : super(
-          bird: bird,
-          builder: _builder,
-          vsync: vsync,
-          thickness: thickness,
-        );
+  final GlobalKey _upperKey = GlobalKey();
+  final GlobalKey _lowerKey = GlobalKey();
 
-  Blocker.withEdges({
-    required BirdPhysics bird,
-    required TickerProvider vsync,
-    double? upperEdge,
-    double? lowerEdge,
-    double thickness = defaultBlockerThickness,
-  }) : super(
-          bird: bird,
-          builder: _builder,
-          vsync: vsync,
-          upperEdge: upperEdge,
-          lowerEdge: lowerEdge,
-          thickness: thickness,
-        );
+  RenderBox? get upperBox => _upperKey?.currentContext?.findRenderObject() as RenderBox;
+  RenderBox? get lowerBox => _lowerKey?.currentContext?.findRenderObject() as RenderBox;
 
-  static final BlockerBuilder _builder = (
-    BuildContext context,
-    BlockerPhysics physics,
-  ) {
-    return SizedBox(
-      width: physics.thickness,
-      height: double.maxFinite,
-      child: Stack(
-        children: <Widget>[
-          Positioned.fill(
-            top: 0.0,
-            bottom: physics.upperEdge,
-            child: _blockerWidget,
-          ),
-          Positioned.fill(
-            top: physics.lowerEdge,
-            bottom: 0.0,
-            child: _blockerWidget,
-          ),
-        ],
+  Blocker(
+      {required this.upper,
+      required this.lower,
+      required this.blockerPosition}):initPosition = blockerPosition;
+
+  void roll() {
+    blockerPosition = blockerPosition -= 0.05;
+    _positionController.add(blockerPosition);
+    if (blockerPosition < -1.5) {
+      blockerPosition += 3;
+      upper = math.Random.secure().nextInt(10)+2;
+      lower = math.Random.secure().nextInt(10)+2;
+    }
+  }
+
+  void resetState(){
+    blockerPosition = initPosition;
+    _positionController.add(blockerPosition);
+  }
+
+  Widget buildBlocker(BuildContext context) {
+    return StreamBuilder<double>(
+        stream: _positionController.stream,
+        builder: (context, snapshot) {
+          return AnimatedAlign(
+            alignment: Alignment(blockerPosition, 0),
+            duration: const Duration(milliseconds: 0),
+            child: Column(
+              children: [
+                Expanded(
+                  key: _upperKey,
+                  flex: upper,
+                  child: buildSingleBlocker(),
+                ),
+                const SizedBox(height: 200),
+                Expanded(
+                  key: _lowerKey,
+                  flex: lower,
+                  child: buildSingleBlocker(),
+                ),
+              ],
+            ),
+          );
+        });
+  }
+
+  Widget buildSingleBlocker() {
+    return Container(
+      width: 80,
+      decoration: BoxDecoration(
+        color: Colors.lightGreen,
       ),
     );
-  };
-
-  static Widget get _blockerWidget {
-    return Container(color: Colors.red);
   }
 }

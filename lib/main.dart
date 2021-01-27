@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutterflappybird/src/game_engine.dart';
 import 'package:flutterflappybird/widget/blocker.dart';
 
 import 'widget/bird.dart';
@@ -15,31 +16,103 @@ class Playground extends StatefulWidget {
 }
 
 class _PlaygroundState extends State<Playground> with TickerProviderStateMixin {
-  late final Bird bird = Bird(vsync: this);
+  late GameEngine gameEngine;
+  Bird get bird => gameEngine.bird;
+  Blocker get blocker1 => gameEngine.blockers[0];
+  Blocker get blocker2 => gameEngine.blockers[1];
+
+  @override
+  void initState() {
+    WidgetsBinding?.instance?.addPostFrameCallback((Duration timeStamp) {
+      gameEngine.init();
+    });
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    gameEngine = GameEngine(
+        stageHeight: MediaQuery.of(context).size.height / 3 * 2 - 20);
+    super.didChangeDependencies();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
-        fit: StackFit.expand,
-        clipBehavior: Clip.none,
-        children: <Widget>[
-          Center(
-            child: StreamBuilder<double>(
-              stream: bird.heightStream,
-              initialData: 0.0,
-              builder: (_, AsyncSnapshot<double> data) {
-                return Text(data.data.toString());
-              },
-            ),
+        children: [
+          GestureDetector(
+            onTap: onUserTap,
+            child: buildStage(context),
           ),
-          bird.build(context),
+          Align(
+            alignment: Alignment(0, -0.6),
+            child: StreamBuilder<bool>(
+                stream: gameEngine.gameStatusPublisher.stream,
+                initialData: false,
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) return Text('TAP TO START');
+                  return snapshot.data ?? false
+                      ? SizedBox()
+                      : Text(
+                          'T A P   T O   S T A R T',
+                          style: TextStyle(
+                            fontSize: 24,
+                            color: Colors.white,
+                          ),
+                        );
+                }),
+          ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: bird.drive,
-        child: const Icon(Icons.airplanemode_active),
-      ),
     );
+  }
+
+  Column buildStage(BuildContext context) {
+    return Column(
+      children: [
+        Expanded(
+          flex: 2,
+          child: Container(
+            color: Colors.blue,
+            child: Stack(
+              children: [
+                bird.build(context),
+                gameEngine.blockers[0].buildBlocker(context),
+//                gameEngine.blockers[1].buildBlocker(context),
+              ],
+            ),
+          ),
+        ),
+        Container(
+          height: 20,
+          color: Colors.green,
+        ),
+        Expanded(
+          child: Container(
+            color: Colors.brown,
+            child: Center(
+              child: StreamBuilder<double>(
+                stream: bird.heightStream,
+                initialData: 0.0,
+                builder: (_, AsyncSnapshot<double> data) {
+                  return Text(data.data.toString(),style: TextStyle(
+                    color: Colors.white
+                  ),);
+                },
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  void onUserTap() {
+    if (gameEngine.gameHasStarted) {
+      bird.drive();
+    } else {
+      gameEngine.startGame();
+    }
   }
 }

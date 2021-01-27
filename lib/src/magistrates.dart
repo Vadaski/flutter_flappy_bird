@@ -1,41 +1,77 @@
 import 'package:flutter/material.dart';
 
 class Magistrates {
-  // 检测小鸟是否碰撞
-  static bool hasHit(
-    double upperBound, // 顶部高度限制
-    double lowerBound, // 底部高度限制
-    double positionToGround, // 当前小鸟位置
-    Size birdSize, // 小鸟大小
-  ) {
-    // 碰撞到上面的柱子
-    final bool hitUpperBlocker =
-        positionToGround + birdSize.height >= upperBound;
-    // 碰撞到下面的柱子
-    final bool hitLowerBlocker = positionToGround <= lowerBound;
-    if (hitUpperBlocker || hitLowerBlocker) {
-      return true;
+  Magistrates(this._hitTarget, this._hitSource);
+  List<RenderBox> _hitTarget;
+  List<RenderBox> _hitSource;
+
+  void updateHitTarget(List<RenderBox> hitTarget) {
+    _hitTarget = hitTarget;
+  }
+
+  void updateHitSource(List<RenderBox> hitSource) {
+    _hitTarget = hitSource;
+  }
+
+  bool hitTestEachObject() {
+    for (final RenderBox targetBox in _hitTarget) {
+      for (final RenderBox sourceBox in _hitSource) {
+//        print('sourceBox${sourceBox.globalToLocal(Offset.zero).toString()}');
+//        print('targetBox${targetBox.globalToLocal(Offset.zero).toString()}');
+        if (hitTest(sourceBox, targetBox)) {
+          return true;
+        }
+      }
     }
-    // 未碰撞到
     return false;
   }
 
-  // 是否撞到地面
-  static bool hasHitGround(double positionToGround) {
-    return positionToGround == 0.0;
-  }
+  bool hitTest(RenderBox box1, RenderBox box2) {
+    final box1Offset = box1.globalToLocal(Offset.zero);
+    final x = box1.size.width;
+    final y = box1.size.height;
 
-  // 是否进入碰撞检测区域
-  static bool canHitTest(
-    double distanceToViewPortLeft, //距离滑动显示区域左部的位置
-    double blockerWidth, //柱子宽度
-    double birdDistanceToViewPortLeft, //小鸟距离滑动显示区域左部的位置
-    double birdWidth, //小鸟大小
-  ) {
-    if ((distanceToViewPortLeft + blockerWidth) > birdDistanceToViewPortLeft &&
-        distanceToViewPortLeft < (birdDistanceToViewPortLeft + birdWidth)) {
-      return true;
+    final leftBorder = box1Offset.dx;
+    final rightBorder = box1Offset.dx + x;
+    final topBorder = box1Offset.dy;
+    final bottomBorder = box1Offset.dy + y;
+
+//    print(
+//        ''
+////            'leftBorder: $leftBorder \n rightBorder: $rightBorder \n '
+//            'topBorder: $topBorder\n bottomBorder: $bottomBorder\n \n');
+
+    final box2Offset = box2.globalToLocal(Offset.zero);
+    final x2 = box2.size.width;
+    final y2 = box2.size.height;
+
+    final leftBorder2 = box2Offset.dx;
+    final rightBorder2 = box2Offset.dx + x2;
+    final topBorder2 = box2Offset.dy;
+    final bottomBorder2 = box2Offset.dy + y2;
+
+    print(
+        ''
+//            'leftBorder: $leftBorder \n rightBorder: $rightBorder \n '
+            'topBorder2: $topBorder2\n bottomBorder2: $bottomBorder2\n \n');
+
+    if (leftBorder2 > leftBorder && leftBorder2 < rightBorder) {
+      if (topBorder2 > bottomBorder && topBorder2 < topBorder) {
+        return true;
+      }
+      if (bottomBorder2 > bottomBorder && bottomBorder2 < topBorder) {
+        return true;
+      }
     }
     return false;
+  }
+
+  Widget buildMock() {
+    return Positioned(
+        child: Container(
+      width: 20,
+      height: 20,
+      color: Colors.lightGreen,
+    ));
   }
 }
