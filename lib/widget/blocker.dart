@@ -49,13 +49,13 @@ class Blocker {
                 Expanded(
                   key: _upperKey,
                   flex: upper,
-                  child: buildSingleBlocker(),
+                  child: buildSingleBlocker(context, true),
                 ),
                 const SizedBox(height: 200),
                 Expanded(
                   key: _lowerKey,
                   flex: lower,
-                  child: buildSingleBlocker(),
+                  child: buildSingleBlocker(context, false),
                 ),
               ],
             ),
@@ -63,11 +63,24 @@ class Blocker {
         });
   }
 
-  Widget buildSingleBlocker() {
+  Widget buildSingleBlocker(BuildContext context, bool isTopBlocker) {
+    final width = MediaQuery.of(context).size.width;
+    final radius = Radius.circular(12);
+    final edge = Radius.zero;
     return Container(
-      width: 80,
+      width: width/4.5,
       decoration: BoxDecoration(
         color: Colors.lightGreen,
+        borderRadius: BorderRadius.only(
+          topLeft: isTopBlocker ? edge : radius,
+          topRight: isTopBlocker ? edge : radius,
+          bottomLeft: isTopBlocker ?  radius:edge,
+          bottomRight: isTopBlocker ?  radius:edge,
+        ),
+        border: Border.all(
+          color: Colors.green,
+          width: 8
+        )
       ),
     );
   }

@@ -19,10 +19,10 @@ class GameEngine {
         upper: math.Random.secure().nextInt(10) + 2,
         lower: math.Random.secure().nextInt(10) + 2,
         blockerPosition: 3),
-//    Blocker(
-//        upper: math.Random.secure().nextInt(10) + 2,
-//        lower: math.Random.secure().nextInt(10) + 2,
-//        blockerPosition: 4.5),
+    Blocker(
+        upper: math.Random.secure().nextInt(10) + 2,
+        lower: math.Random.secure().nextInt(10) + 2,
+        blockerPosition: 4.5),
   ];
   final double stageHeight;
 

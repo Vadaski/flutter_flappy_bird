@@ -34,12 +34,7 @@ class Magistrates {
     final leftBorder = box1Offset.dx;
     final rightBorder = box1Offset.dx + x;
     final topBorder = box1Offset.dy;
-    final bottomBorder = box1Offset.dy + y;
-
-//    print(
-//        ''
-////            'leftBorder: $leftBorder \n rightBorder: $rightBorder \n '
-//            'topBorder: $topBorder\n bottomBorder: $bottomBorder\n \n');
+    final bottomBorder = box1Offset.dy - y;
 
     final box2Offset = box2.globalToLocal(Offset.zero);
     final x2 = box2.size.width;
@@ -48,18 +43,22 @@ class Magistrates {
     final leftBorder2 = box2Offset.dx;
     final rightBorder2 = box2Offset.dx + x2;
     final topBorder2 = box2Offset.dy;
-    final bottomBorder2 = box2Offset.dy + y2;
-
-    print(
-        ''
-//            'leftBorder: $leftBorder \n rightBorder: $rightBorder \n '
-            'topBorder2: $topBorder2\n bottomBorder2: $bottomBorder2\n \n');
+    final bottomBorder2 = box2Offset.dy - y2;
 
     if (leftBorder2 > leftBorder && leftBorder2 < rightBorder) {
       if (topBorder2 > bottomBorder && topBorder2 < topBorder) {
         return true;
       }
       if (bottomBorder2 > bottomBorder && bottomBorder2 < topBorder) {
+        return true;
+      }
+    }
+
+    if (leftBorder > leftBorder2 && leftBorder < rightBorder2) {
+      if (topBorder > bottomBorder2 && topBorder < topBorder2) {
+        return true;
+      }
+      if (bottomBorder > bottomBorder2 && bottomBorder < topBorder2) {
         return true;
       }
     }

@@ -55,7 +55,7 @@ class _PlaygroundState extends State<Playground> with TickerProviderStateMixin {
                   return snapshot.data ?? false
                       ? SizedBox()
                       : Text(
-                          'T A P   T O   S T A R T',
+                          'TAP  TO  START',
                           style: TextStyle(
                             fontSize: 24,
                             color: Colors.white,
@@ -79,7 +79,7 @@ class _PlaygroundState extends State<Playground> with TickerProviderStateMixin {
               children: [
                 bird.build(context),
                 gameEngine.blockers[0].buildBlocker(context),
-//                gameEngine.blockers[1].buildBlocker(context),
+                gameEngine.blockers[1].buildBlocker(context),
               ],
             ),
           ),
@@ -89,22 +89,35 @@ class _PlaygroundState extends State<Playground> with TickerProviderStateMixin {
           color: Colors.green,
         ),
         Expanded(
-          child: Container(
-            color: Colors.brown,
-            child: Center(
-              child: StreamBuilder<double>(
-                stream: bird.heightStream,
-                initialData: 0.0,
-                builder: (_, AsyncSnapshot<double> data) {
-                  return Text(data.data.toString(),style: TextStyle(
-                    color: Colors.white
-                  ),);
-                },
-              ),
-            ),
-          ),
+          child: buildScore(),
         ),
       ],
+    );
+  }
+
+  Container buildScore() {
+    final textStyle = TextStyle(
+        fontSize: 20, color: Colors.white, fontWeight: FontWeight.w400);
+    return Container(
+      color: Colors.brown,
+      child: Row(
+        children: [
+          Expanded(
+              child: Center(
+            child: Text(
+              'Score: ',
+              style: textStyle,
+            ),
+          )),
+          Expanded(
+              child: Center(
+            child: Text(
+              'Highest Score: ',
+              style: textStyle,
+            ),
+          )),
+        ],
+      ),
     );
   }
 
