@@ -8,15 +8,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutterflappybird/src/component.dart';
 
-class Bird extends Component<double>{
+class Bird extends Component<double> {
   Bird({
     this.builder,
     this.birdSize = const Size.square(70.0),
-  }){
-   super.addGlobalKey(GlobalKey());
+  }) {
+    super.addGlobalKey(GlobalKey());
   }
 
-   final Size birdSize;
+  final Size birdSize;
   final AsyncWidgetBuilder<double>? builder;
 
   double _yAxis = 0.0;
@@ -35,6 +35,7 @@ class Bird extends Component<double>{
 
   RenderBox? get box => _key.currentContext?.findRenderObject() as RenderBox;
 
+  bool get hitGround => _yAxis > 1 || _yAxis < -1;
   void drive() {
     _time = 0;
     _initialHeight = _yAxis;
@@ -44,15 +45,16 @@ class Bird extends Component<double>{
   @override
   void update(Timer timer) {
     _time += 0.05;
-    _currentHeight = -4.9 * _time * _time + 2.8 * _time;
+    _currentHeight = -4.8 * _time * _time + 2.8 * _time;
     _yAxis = _initialHeight - _currentHeight;
     statusReducer.add(_yAxis);
-    if (_yAxis > 1 || _yAxis < -1) {
+    if (hitGround) {
       timer.cancel();
       resetState();
     }
   }
 
+  @override
   void resetState() {
     _yAxis = 0;
     _time = 0;
@@ -61,6 +63,7 @@ class Bird extends Component<double>{
     statusReducer.add(_yAxis);
   }
 
+  @override
   Widget build(BuildContext context) {
     return StreamBuilder<double>(
       stream: heightStream,
@@ -68,16 +71,14 @@ class Bird extends Component<double>{
       builder: (BuildContext ctx, AsyncSnapshot<double> snapshot) {
         final double currentHeight = snapshot.data ?? 0;
         return AnimatedContainer(
-          duration: const Duration(milliseconds: 60),
-          alignment: Alignment(0.0, currentHeight),
-          child: SizedBox(
-            key: _key,
-            child: builder?.call(context, snapshot) ??
-                FlutterLogo(size: birdSize.width),
-          )
-        );
+            duration: const Duration(milliseconds: 60),
+            alignment: Alignment(0.0, currentHeight),
+            child: SizedBox(
+              key: _key,
+              child: builder?.call(context, snapshot) ??
+                  FlutterLogo(size: birdSize.width),
+            ));
       },
     );
   }
-
 }

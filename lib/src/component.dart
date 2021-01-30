@@ -10,7 +10,7 @@ abstract class Component<T> {
 
   final List<GlobalKey> keys = [];
 
-  int addGlobalKey(GlobalKey key){
+  int addGlobalKey(GlobalKey key) {
     keys.add(key);
     return keys.length - 1;
   }
@@ -19,4 +19,8 @@ abstract class Component<T> {
       keys[index].currentContext?.findRenderObject() as RenderBox;
 
   void update(Timer timer);
+
+  void resetState();
+
+  Widget build(BuildContext context);
 }

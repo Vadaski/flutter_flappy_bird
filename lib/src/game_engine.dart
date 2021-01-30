@@ -3,9 +3,8 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutterflappybird/src/magistrates.dart';
-import 'package:flutterflappybird/widget/bird.dart';
-import 'package:flutterflappybird/widget/blocker.dart';
-
+import 'package:flutterflappybird/component_impl/bird.dart';
+import 'package:flutterflappybird/component_impl/blocker.dart';
 
 class GameEngine {
   GameEngine({
@@ -51,8 +50,8 @@ class GameEngine {
     gameStatusPublisher.add(gameHasStarted);
     timer = Timer.periodic(const Duration(milliseconds: 50), (Timer timer) {
       bird.update(timer);
-      for(int i = 0; i < 10; i++){
-        blockers.forEach((blocker) => blocker.roll());
+      for (int i = 0; i < 10; i++) {
+        blockers.forEach((blocker) => blocker.update(timer));
         if (_magistrates.hitTestEachObject()) {
           timer.cancel();
           bird.resetState();
@@ -65,7 +64,6 @@ class GameEngine {
         gameHasStarted = false;
         gameStatusPublisher.add(gameHasStarted);
       }
-
     });
 
     RenderBox renderBox;

@@ -3,43 +3,53 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
-class Blocker {
+import 'package:flutterflappybird/src/component.dart';
+
+class Blocker extends Component<double> {
   int upper;
   int lower;
   double blockerPosition = 0;
   double initPosition;
-  StreamController<double> _positionController =
-      StreamController<double>.broadcast();
 
-  final GlobalKey _upperKey = GlobalKey();
-  final GlobalKey _lowerKey = GlobalKey();
+  GlobalKey get _upperKey => super.keys[0];
+  GlobalKey get _lowerKey => super.keys[1];
 
-  RenderBox? get upperBox => _upperKey.currentContext?.findRenderObject() as RenderBox;
-  RenderBox? get lowerBox => _lowerKey.currentContext?.findRenderObject() as RenderBox;
+  RenderBox? get upperBox =>
+      _upperKey.currentContext?.findRenderObject() as RenderBox;
+  RenderBox? get lowerBox =>
+      _lowerKey.currentContext?.findRenderObject() as RenderBox;
 
   Blocker(
-      {required this.upper,
-      required this.lower,
-      required this.blockerPosition}):initPosition = blockerPosition;
+      {required this.upper, required this.lower, required this.blockerPosition})
+      : initPosition = blockerPosition {
+    super.keys..add(GlobalKey())..add(GlobalKey());
+  }
 
-  void roll() {
+  @override
+  void update(Timer timer) {
     blockerPosition = blockerPosition -= 0.005;
-    _positionController.add(blockerPosition);
+    statusReducer.add(blockerPosition);
     if (blockerPosition < -1.5) {
       blockerPosition += 3;
-      upper = math.Random.secure().nextInt(10)+2;
-      lower = math.Random.secure().nextInt(10)+2;
+      upper = math.Random.secure().nextInt(10) + 2;
+      lower = math.Random.secure().nextInt(10) + 2;
     }
   }
 
-  void resetState(){
+  @override
+  void resetState() {
     blockerPosition = initPosition;
-    _positionController.add(blockerPosition);
+    statusReducer.add(blockerPosition);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return buildBlocker(context);
   }
 
   Widget buildBlocker(BuildContext context) {
     return StreamBuilder<double>(
-        stream: _positionController.stream,
+        stream: status,
         builder: (context, snapshot) {
           return AnimatedAlign(
             alignment: Alignment(blockerPosition, 0),
@@ -68,20 +78,16 @@ class Blocker {
     final radius = Radius.circular(12);
     final edge = Radius.zero;
     return Container(
-      width: width/4.5,
+      width: width / 4.5,
       decoration: BoxDecoration(
-        color: Colors.lightGreen,
-        borderRadius: BorderRadius.only(
-          topLeft: isTopBlocker ? edge : radius,
-          topRight: isTopBlocker ? edge : radius,
-          bottomLeft: isTopBlocker ?  radius:edge,
-          bottomRight: isTopBlocker ?  radius:edge,
-        ),
-        border: Border.all(
-          color: Colors.green,
-          width: 8
-        )
-      ),
+          color: Colors.lightGreen,
+          borderRadius: BorderRadius.only(
+            topLeft: isTopBlocker ? edge : radius,
+            topRight: isTopBlocker ? edge : radius,
+            bottomLeft: isTopBlocker ? radius : edge,
+            bottomRight: isTopBlocker ? radius : edge,
+          ),
+          border: Border.all(color: Colors.green, width: 8)),
     );
   }
 }
