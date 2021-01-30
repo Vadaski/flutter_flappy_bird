@@ -14,8 +14,8 @@ class Blocker {
   final GlobalKey _upperKey = GlobalKey();
   final GlobalKey _lowerKey = GlobalKey();
 
-  RenderBox? get upperBox => _upperKey?.currentContext?.findRenderObject() as RenderBox;
-  RenderBox? get lowerBox => _lowerKey?.currentContext?.findRenderObject() as RenderBox;
+  RenderBox? get upperBox => _upperKey.currentContext?.findRenderObject() as RenderBox;
+  RenderBox? get lowerBox => _lowerKey.currentContext?.findRenderObject() as RenderBox;
 
   Blocker(
       {required this.upper,
@@ -23,7 +23,7 @@ class Blocker {
       required this.blockerPosition}):initPosition = blockerPosition;
 
   void roll() {
-    blockerPosition = blockerPosition -= 0.05;
+    blockerPosition = blockerPosition -= 0.005;
     _positionController.add(blockerPosition);
     if (blockerPosition < -1.5) {
       blockerPosition += 3;

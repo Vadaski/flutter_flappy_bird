@@ -23,7 +23,7 @@ class _PlaygroundState extends State<Playground> with TickerProviderStateMixin {
 
   @override
   void initState() {
-    WidgetsBinding?.instance?.addPostFrameCallback((Duration timeStamp) {
+    WidgetsBinding.instance?.addPostFrameCallback((Duration timeStamp) {
       gameEngine.init();
     });
     super.initState();
@@ -112,7 +112,7 @@ class _PlaygroundState extends State<Playground> with TickerProviderStateMixin {
           Expanded(
               child: Center(
             child: Text(
-              'Highest Score: ',
+              'Best Score: ',
               style: textStyle,
             ),
           )),

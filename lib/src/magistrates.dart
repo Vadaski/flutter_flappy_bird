@@ -32,7 +32,7 @@ class Magistrates {
     final y = box1.size.height;
 
     final leftBorder = box1Offset.dx;
-    final rightBorder = box1Offset.dx + x;
+    final rightBorder = box1Offset.dx + x/2;
     final topBorder = box1Offset.dy;
     final bottomBorder = box1Offset.dy - y;
 
@@ -41,7 +41,7 @@ class Magistrates {
     final y2 = box2.size.height;
 
     final leftBorder2 = box2Offset.dx;
-    final rightBorder2 = box2Offset.dx + x2;
+    final rightBorder2 = box2Offset.dx + x2/2;
     final topBorder2 = box2Offset.dy;
     final bottomBorder2 = box2Offset.dy - y2;
 
