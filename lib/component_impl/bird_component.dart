@@ -8,8 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutterflappybird/src/component.dart';
 
-class Bird extends Component<double> {
-  Bird({
+class BirdComponent extends Component<double> {
+  BirdComponent({
     this.builder,
     this.birdSize = const Size.square(70.0),
   }) {
@@ -35,7 +35,7 @@ class Bird extends Component<double> {
 
   RenderBox? get box => _key.currentContext?.findRenderObject() as RenderBox;
 
-  bool get hitGround => _yAxis > 1 || _yAxis < -1;
+  bool get hitGround => _yAxis > 1.4 || _yAxis < -1.2;
   void drive() {
     _time = 0;
     _initialHeight = _yAxis;
@@ -60,6 +60,7 @@ class Bird extends Component<double> {
     _time = 0;
     _currentHeight = 0;
     _initialHeight = 0;
+
     statusReducer.add(_yAxis);
   }
 
@@ -74,10 +75,11 @@ class Bird extends Component<double> {
             duration: const Duration(milliseconds: 60),
             alignment: Alignment(0.0, currentHeight),
             child: SizedBox(
-              key: _key,
+                key: _key,
               child: builder?.call(context, snapshot) ??
                   FlutterLogo(size: birdSize.width),
-            ));
+            )
+        );
       },
     );
   }

@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import 'dart:math' as math;
 
 import 'package:flutterflappybird/src/component.dart';
+import 'package:flutterflappybird/src/score_counter.dart';
 
-class Blocker extends Component<double> {
+class BlockerComponent extends Component<double> {
   int upper;
   int lower;
   double blockerPosition = 0;
@@ -19,7 +20,9 @@ class Blocker extends Component<double> {
   RenderBox? get lowerBox =>
       _lowerKey.currentContext?.findRenderObject() as RenderBox;
 
-  Blocker(
+  bool counted = false;
+
+  BlockerComponent(
       {required this.upper, required this.lower, required this.blockerPosition})
       : initPosition = blockerPosition {
     super.keys..add(GlobalKey())..add(GlobalKey());
@@ -29,10 +32,15 @@ class Blocker extends Component<double> {
   void update(Timer timer) {
     blockerPosition = blockerPosition -= 0.005;
     statusReducer.add(blockerPosition);
+    if (blockerPosition < 0 && !counted) {
+      counted = true;
+      counter.getScore();
+    }
     if (blockerPosition < -1.5) {
       blockerPosition += 3;
       upper = math.Random.secure().nextInt(10) + 2;
       lower = math.Random.secure().nextInt(10) + 2;
+      counted = false;
     }
   }
 
@@ -40,6 +48,7 @@ class Blocker extends Component<double> {
   void resetState() {
     blockerPosition = initPosition;
     statusReducer.add(blockerPosition);
+    counted = false;
   }
 
   @override
@@ -74,6 +83,7 @@ class Blocker extends Component<double> {
   }
 
   Widget buildSingleBlocker(BuildContext context, bool isTopBlocker) {
+    final double padding = 20;
     final width = MediaQuery.of(context).size.width;
     final radius = Radius.circular(12);
     final edge = Radius.zero;

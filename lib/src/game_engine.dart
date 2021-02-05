@@ -2,28 +2,34 @@ import 'dart:async';
 
 import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutterflappybird/component_impl/bird_animation.dart';
 import 'package:flutterflappybird/src/magistrates.dart';
-import 'package:flutterflappybird/component_impl/bird.dart';
-import 'package:flutterflappybird/component_impl/blocker.dart';
+import 'package:flutterflappybird/component_impl/bird_component.dart';
+import 'package:flutterflappybird/component_impl/blocker_component.dart';
+import 'package:flutterflappybird/src/score_counter.dart';
 
 class GameEngine {
-  GameEngine({
-    required this.stageHeight,
-  });
-
   late Magistrates _magistrates;
-  Bird bird = Bird();
-  List<Blocker> blockers = [
-    Blocker(
+  BirdComponent bird = BirdComponent(
+      builder: (context, snapshot) {
+        return SizedBox(
+          height: 120,
+          width: 120,
+          child: BirdAnimation(),
+        );
+      },
+      birdSize: Size.square(50));
+  List<BlockerComponent> blockers = [
+    BlockerComponent(
         upper: math.Random.secure().nextInt(10) + 2,
         lower: math.Random.secure().nextInt(10) + 2,
         blockerPosition: 3),
-    Blocker(
+    BlockerComponent(
         upper: math.Random.secure().nextInt(10) + 2,
         lower: math.Random.secure().nextInt(10) + 2,
         blockerPosition: 4.5),
   ];
-  final double stageHeight;
 
   bool gameHasStarted = false;
 
@@ -45,9 +51,13 @@ class GameEngine {
     );
   }
 
-  void startGame() {
+  void startGame(BuildContext context) {
     gameHasStarted = true;
     gameStatusPublisher.add(gameHasStarted);
+    createGameLooper(context);
+  }
+
+  void createGameLooper(BuildContext context) {
     timer = Timer.periodic(const Duration(milliseconds: 50), (Timer timer) {
       bird.update(timer);
       for (int i = 0; i < 10; i++) {
@@ -60,12 +70,23 @@ class GameEngine {
       }
 
       if (!timer.isActive) {
+        counter.resetState();
         blockers.forEach((blocker) => blocker.resetState());
         gameHasStarted = false;
         gameStatusPublisher.add(gameHasStarted);
+        showCupertinoDialog<void>(
+            context: context,
+            builder: (context) {
+              return GestureDetector(
+                onTap: () {
+                  Navigator.of(context).maybePop();
+                },
+                child: const CupertinoAlertDialog(
+                  title: Text('Game Over'),
+                ),
+              );
+            });
       }
     });
-
-    RenderBox renderBox;
   }
 }

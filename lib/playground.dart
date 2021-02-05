@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutterflappybird/src/game_engine.dart';
+import 'package:flutterflappybird/src/score_counter.dart';
 
-import 'component_impl/bird.dart';
-import 'component_impl/blocker.dart';
+import 'component_impl/bird_component.dart';
+import 'component_impl/blocker_component.dart';
 
 class Playground extends StatefulWidget {
   const Playground({Key? key}) : super(key: key);
@@ -12,10 +13,10 @@ class Playground extends StatefulWidget {
 }
 
 class _PlaygroundState extends State<Playground> with TickerProviderStateMixin {
-  late GameEngine gameEngine;
-  Bird get bird => gameEngine.bird;
-  Blocker get blocker1 => gameEngine.blockers[0];
-  Blocker get blocker2 => gameEngine.blockers[1];
+  late GameEngine gameEngine = GameEngine();
+  BirdComponent get bird => gameEngine.bird;
+  BlockerComponent get blocker1 => gameEngine.blockers[0];
+  BlockerComponent get blocker2 => gameEngine.blockers[1];
 
   @override
   void initState() {
@@ -23,13 +24,6 @@ class _PlaygroundState extends State<Playground> with TickerProviderStateMixin {
       gameEngine.init();
     });
     super.initState();
-  }
-
-  @override
-  void didChangeDependencies() {
-    gameEngine = GameEngine(
-        stageHeight: MediaQuery.of(context).size.height / 3 * 2 - 20);
-    super.didChangeDependencies();
   }
 
   @override
@@ -55,6 +49,7 @@ class _PlaygroundState extends State<Playground> with TickerProviderStateMixin {
                           style: TextStyle(
                             fontSize: 24,
                             color: Colors.white,
+                            fontWeight: FontWeight.w300
                           ),
                         );
                 }),
@@ -70,7 +65,7 @@ class _PlaygroundState extends State<Playground> with TickerProviderStateMixin {
         Expanded(
           flex: 2,
           child: Container(
-            color: Colors.blue,
+            color: Colors.blueAccent,
             child: Stack(
               children: [
                 bird.build(context),
@@ -100,16 +95,28 @@ class _PlaygroundState extends State<Playground> with TickerProviderStateMixin {
         children: [
           Expanded(
               child: Center(
-            child: Text(
-              'Score: ',
-              style: textStyle,
-            ),
+            child: StreamBuilder(
+              initialData: 0,
+              stream: counter.scoreEventPublisher.stream,
+              builder: (context, score){
+                return Text(
+                  ' Score: ${score.data}',
+                  style: textStyle,
+                );
+              },
+            )
           )),
           Expanded(
               child: Center(
-            child: Text(
-              'Best Score: ',
-              style: textStyle,
+            child: StreamBuilder(
+              initialData: 0,
+              stream: counter.bestScoreEventPublisher.stream,
+              builder: (context, score){
+                return Text(
+                  'Best Score: ${score.data}',
+                  style: textStyle,
+                );
+              },
             ),
           )),
         ],
@@ -121,7 +128,7 @@ class _PlaygroundState extends State<Playground> with TickerProviderStateMixin {
     if (gameEngine.gameHasStarted) {
       bird.drive();
     } else {
-      gameEngine.startGame();
+      gameEngine.startGame(context);
     }
   }
 }
