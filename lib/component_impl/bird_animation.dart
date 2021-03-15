@@ -1,6 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rive/rive.dart';
-import 'package:flutter/material.dart';
 
 class BirdAnimation extends StatefulWidget {
   @override
@@ -9,7 +9,7 @@ class BirdAnimation extends StatefulWidget {
 
 class _BirdAnimationState extends State<BirdAnimation> {
   /// The artboard we'll use to play one of its animations
-  late Artboard _artboard;
+  Artboard _artboard;
 
   @override
   void initState() {
@@ -38,6 +38,5 @@ class _BirdAnimationState extends State<BirdAnimation> {
   }
 
   @override
-  Widget build(BuildContext context) =>
-      _artboard != null ? Rive(artboard: _artboard) : Container();
+  Widget build(BuildContext context) => _artboard != null ? Rive(artboard: _artboard) : Container();
 }
